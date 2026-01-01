@@ -1,0 +1,100 @@
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+
+# Generated plugin registrant
+**/GeneratedPluginRegistrant.*
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/key.properties
+**/android/.idea/
+**/android/.settings/
+**/android/build/
+**/android/app/build/
+**/android/app/release/
+**/android/app/debug/
+**/android/app/profile/
+
+# iOS related
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Podfile.lock
+**/ios/build/
+**/ios/.generated/
+**/ios/Runner.xcworkspace/
+**/ios/Runner/Runner.entitlements
+
+# macOS
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/Podfile.lock
+**/macos/build/
+**/macos/.symlinks/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Windows
+**/windows/flutter/ephemeral/
+**/windows/build/
+
+# Linux
+**/linux/flutter/ephemeral/
+**/linux/build/
+
+# Web
+**/web/.dart_tool/
+**/web/build/
+
+# VS Code
+.vscode/
+.idea/
+*.iml
+
+# IntelliJ
+*.ipr
+*.iws
+*.idea/
+
+# Xcode
+*.xcuserstate
+*.xcworkspace
+*.xcuserdata/
+
+# Misc
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.bak
+*.lock
+*.orig
+
+# Environment files
+.env
+.env.*
+
+# Firebase / secrets
+google-services.json
+GoogleService-Info.plist
+
+# Symbolic links & temp
+symlinks/
+temp/
+tmp/

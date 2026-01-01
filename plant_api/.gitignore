@@ -1,0 +1,155 @@
+# =====================================
+# Django & Python
+# =====================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite database (local dev only)
+db.sqlite3
+db.sqlite3-journal
+
+# Django migrations cache
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.pyo
+
+# Local settings or secrets
+*.env
+.env
+.env.local
+.env.*.local
+*.secret
+secrets.json
+
+# =====================================
+# Virtual environments
+# =====================================
+venv/
+.env/
+env/
+venv.bak/
+python_env/
+.Python
+
+# =====================================
+# Byte-compiled / optimized / DLL files
+# =====================================
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+
+# =====================================
+# Build and distribution
+# =====================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =====================================
+# Static & Media
+# =====================================
+staticfiles/
+static/
+media/
+uploads/
+assets/
+tmp/
+
+# =====================================
+# Logs & Debug
+# =====================================
+*.log
+*.pot
+*.mo
+*.pid
+*.seed
+*.cover
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.py,cover
+.tox/
+.cache/
+.pytest_cache/
+htmlcov/
+local_settings.py
+debug.log
+
+# =====================================
+# IDEs & Editors
+# =====================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# =====================================
+# OS Files
+# =====================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =====================================
+# TensorFlow / ML Models
+# =====================================
+*.h5
+*.hdf5
+*.tflite
+*.pb
+*.pkl
+*.joblib
+models/
+checkpoints/
+trained_models/
+
+# =====================================
+# Docker / Deployment
+# =====================================
+docker-compose.override.yml
+*.pid
+*.sock
+*.tar
+*.gz
+*.zip
+
+# =====================================
+# Render / Gunicorn / Server
+# =====================================
+static_cdn/
+media_cdn/
+run/
+logs/
+*.log
+
+# =====================================
+# Jupyter / Colab
+# =====================================
+.ipynb_checkpoints
+*.ipynb
+
+# =====================================
+# Temporary files
+# =====================================
+tmp/
+temp/
+__MACOSX/

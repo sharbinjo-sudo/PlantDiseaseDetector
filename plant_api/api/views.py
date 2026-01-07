@@ -162,10 +162,11 @@ def predict_disease(img_norm):
 # =====================================================
 # API
 # =====================================================
-
+@csrf_exempt
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def api_predict(request):
+
     if "image" not in request.FILES:
         return Response({"error": "No image provided"}, status=400)
 

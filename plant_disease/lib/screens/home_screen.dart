@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; // 👈 for SystemNavigator.pop()
 import '../widgets/navbar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -65,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // ✅ Android back-press exit confirmation
   Future<bool> _handleAppExit() async {
     final now = DateTime.now();
 
@@ -82,12 +84,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (Platform.isAndroid) {
-      SystemNavigator.pop();
+      SystemNavigator.pop(); // Clean Android exit
       return false;
     } else {
       return true;
     }
   }
+
+  // 🌿 Text Section
   Widget _buildTextSection(BuildContext context, bool isSmallScreen) {
     return Column(
       crossAxisAlignment:
@@ -144,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 🌿 Image Section
   Widget _buildImageSection(bool isSmallScreen) {
     return Center(
       child: Image.asset(

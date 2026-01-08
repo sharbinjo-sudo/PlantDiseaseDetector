@@ -24,6 +24,7 @@ class GraphScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
+            // 🔹 Training vs Validation Accuracy
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -39,6 +40,7 @@ class GraphScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
+                  // 🔹 Training vs Validation Loss
                   _buildGraphCard(
                     title: "Training vs Validation Loss",
                     yLabel: "Loss",
@@ -100,7 +102,7 @@ Widget _buildGraphCard({
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 1,
+                      interval: 1, // ✅ show every epoch exactly once
                       reservedSize: 32,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
@@ -135,7 +137,7 @@ Widget _buildGraphCard({
                   show: true,
                   border: Border.all(color: Colors.black12),
                 ),
-                minX: 0,
+                minX: 0, // ✅ fix X-axis range
                 maxX: (data1.length - 1).toDouble(),
                 minY: yLabel.contains("Accuracy") ? 60 : 0.2,
                 maxY: yLabel.contains("Accuracy") ? 100 : 1.2,

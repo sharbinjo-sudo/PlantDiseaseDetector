@@ -22,9 +22,11 @@ class PlantDiseaseApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Colors.black87),
         ),
       ),
+      // 👇 ensure app *always starts* at HomeScreen
       initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
+        // you can add future pages here
         '/predict': (context) => const PredictScreen(),
         '/graph': (context) => const GraphScreen(),
       },

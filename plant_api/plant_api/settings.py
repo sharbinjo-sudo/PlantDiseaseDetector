@@ -19,7 +19,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-key")
 DEBUG = True
 
 # ✅ Allow all local connections (for emulator, LAN, etc.)
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0"]
 
 # ===========================================
 # 📦 INSTALLED APPS
@@ -125,14 +125,26 @@ MEDIA_ROOT = BASE_DIR / "media"
 # ✅ Always use local file storage — no Cloudinary or external service
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
+# ===========================================
+# 🧩 REST FRAMEWORK
+# ===========================================
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
 }
 
+# ===========================================
+# 🔄 CORS (Allow everything for local dev)
+# ===========================================
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# ===========================================
+# 🚀 DEBUG LOGGING (helpful in console)
+# ===========================================
 
 LOGGING = {
     "version": 1,

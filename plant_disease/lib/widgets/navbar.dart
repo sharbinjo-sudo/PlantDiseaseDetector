@@ -11,6 +11,7 @@ class NavBar extends StatelessWidget {
       color: Colors.white,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // 🌿 For small screens (mobile)
           if (constraints.maxWidth < 600) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,6 +71,7 @@ class NavBar extends StatelessWidget {
             );
           }
 
+          // 🌿 For large screens (desktop / tablet)
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

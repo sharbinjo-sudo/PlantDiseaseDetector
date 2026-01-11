@@ -1,31 +1,23 @@
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework import status
 from django.conf import settings
 from .models import PredictionRecord
 
 import numpy as np
 import cv2
 import os
+import cloudinary.uploader
+from skimage.feature import graycomatrix, graycoprops
 
 try:
-    import tflite_runtime.interpreter as tf
+    from tflite_runtime.interpreter import Interpreter
 except ImportError:
-    import tensorflow as tf
+    from tensorflow.lite import Interpreter
 
-from skimage.feature import graycomatrix, graycoprops
-import cloudinary.uploader
-
-# =====================================================
-# CONFIG
-# =====================================================
 USE_CLOUDINARY = True
 KEEP_HISTORY = False
 
-# =====================================================
-# MODEL
-# =====================================================
 TFLITE_PATH = os.path.join(settings.BASE_DIR, "leaf_disease_model.tflite")
 
 INTERPRETER = None
@@ -34,18 +26,17 @@ OUTPUT_DETAILS = None
 
 CLASSES = ["Healthy", "Powdery", "Rust"]
 
+
 def get_interpreter():
     global INTERPRETER, INPUT_DETAILS, OUTPUT_DETAILS
     if INTERPRETER is None:
-        INTERPRETER = tf.lite.Interpreter(model_path=TFLITE_PATH)
+        INTERPRETER = Interpreter(model_path=TFLITE_PATH)
         INTERPRETER.allocate_tensors()
         INPUT_DETAILS = INTERPRETER.get_input_details()
         OUTPUT_DETAILS = INTERPRETER.get_output_details()
     return INTERPRETER
 
-# =====================================================
-# IMAGE PIPELINE
-# =====================================================
+
 def preprocess_image_from_bytes(file_bytes):
     img = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
     if img is None:
@@ -54,6 +45,7 @@ def preprocess_image_from_bytes(file_bytes):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img_norm = img.astype(np.float32) / 255.0
     return img, img_norm
+
 
 def segment_image(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -64,26 +56,28 @@ def segment_image(image):
     mask = cv2.dilate(mask, kernel, iterations=1)
     return cv2.bitwise_and(image, image, mask=mask)
 
+
 def extract_features(segmented_image):
     gray = cv2.cvtColor(segmented_image, cv2.COLOR_BGR2GRAY)
     glcm = graycomatrix(gray, [5], [0], 256, symmetric=True, normed=True)
+
     features = {
         "contrast": graycoprops(glcm, "contrast")[0, 0],
         "correlation": graycoprops(glcm, "correlation")[0, 0],
         "energy": graycoprops(glcm, "energy")[0, 0],
         "homogeneity": graycoprops(glcm, "homogeneity")[0, 0],
     }
+
     mean_color = cv2.mean(segmented_image)[:3]
     features.update({
-        "mean_R": round(float(mean_color[2]), 2),
-        "mean_G": round(float(mean_color[1]), 2),
-        "mean_B": round(float(mean_color[0]), 2),
+        "mean_R": round(mean_color[2], 2),
+        "mean_G": round(mean_color[1], 2),
+        "mean_B": round(mean_color[0], 2),
     })
+
     return {k: round(float(v), 3) for k, v in features.items()}
 
-# =====================================================
-# METRICS
-# =====================================================
+
 def compute_metrics(cm, label_index):
     total = np.sum(cm)
     correct = np.trace(cm)
@@ -109,10 +103,11 @@ def compute_metrics(cm, label_index):
         "FN": int(FN),
     }
 
+
 def predict_disease(img_norm):
     img = np.expand_dims(img_norm, axis=0)
     interpreter = get_interpreter()
-    interpreter.set_tensor(INPUT_DETAILS[0]["index"], img.astype(np.float32))
+    interpreter.set_tensor(INPUT_DETAILS[0]["index"], img)
     interpreter.invoke()
     preds = interpreter.get_tensor(OUTPUT_DETAILS[0]["index"])[0]
 
@@ -120,13 +115,11 @@ def predict_disease(img_norm):
     confidence = float(preds[label_index])
 
     scale = 50
-    matrix = np.zeros((len(CLASSES), len(CLASSES)))
-    for i in range(len(CLASSES)):
-        for j in range(len(CLASSES)):
-            if i == j:
-                matrix[i, j] = preds[i] * scale + (10 if i == label_index else 5)
-            else:
-                matrix[i, j] = preds[j] * scale / 6
+    matrix = np.zeros((3, 3))
+    for i in range(3):
+        for j in range(3):
+            matrix[i, j] = preds[j] * scale / 6
+        matrix[i, i] = preds[i] * scale + (10 if i == label_index else 5)
 
     matrix = np.clip(matrix, 0, scale)
     cm_int = np.rint(matrix).astype(int)
@@ -134,9 +127,9 @@ def predict_disease(img_norm):
     cm_dict = {
         CLASSES[i]: {
             CLASSES[j]: round(float(matrix[i, j]), 1)
-            for j in range(len(CLASSES))
+            for j in range(3)
         }
-        for i in range(len(CLASSES))
+        for i in range(3)
     }
 
     metrics = compute_metrics(cm_int, label_index)
@@ -144,38 +137,29 @@ def predict_disease(img_norm):
 
     return CLASSES[label_index], confidence, cm_dict, metrics
 
-# =====================================================
-# CLEANUP
-# =====================================================
-def delete_previous_cloudinary_images():
+
+def delete_previous():
     last = PredictionRecord.objects.order_by("-id").first()
     if not last:
         return
-
     try:
-        if last.cloudinary_original_id:
-            cloudinary.uploader.destroy(last.cloudinary_original_id)
-        if last.cloudinary_preprocessed_id:
-            cloudinary.uploader.destroy(last.cloudinary_preprocessed_id)
-        if last.cloudinary_segmented_id:
-            cloudinary.uploader.destroy(last.cloudinary_segmented_id)
+        cloudinary.uploader.destroy(last.cloudinary_original_id)
+        cloudinary.uploader.destroy(last.cloudinary_preprocessed_id)
+        cloudinary.uploader.destroy(last.cloudinary_segmented_id)
         last.delete()
-    except Exception as e:
-        print("⚠️ Cloudinary cleanup failed:", e)
+    except Exception:
+        pass
 
-# =====================================================
-# API
-# =====================================================
+
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def api_predict(request):
-
     if "image" not in request.FILES:
         return Response({"error": "No image provided"}, status=400)
 
     try:
         if not KEEP_HISTORY:
-            delete_previous_cloudinary_images()
+            delete_previous()
 
         file_bytes = request.FILES["image"].read()
 
@@ -186,14 +170,10 @@ def api_predict(request):
         label, confidence, cm, metrics = predict_disease(img_norm)
 
         orig = cloudinary.uploader.upload(file_bytes, folder="plant_disease/originals/")
-        pre = cloudinary.uploader.upload(
-            cv2.imencode(".jpg", pre_img)[1].tobytes(),
-            folder="plant_disease/preprocessed/"
-        )
-        seg = cloudinary.uploader.upload(
-            cv2.imencode(".jpg", seg_img)[1].tobytes(),
-            folder="plant_disease/segmented/"
-        )
+        pre = cloudinary.uploader.upload(cv2.imencode(".jpg", pre_img)[1].tobytes(),
+                                          folder="plant_disease/preprocessed/")
+        seg = cloudinary.uploader.upload(cv2.imencode(".jpg", seg_img)[1].tobytes(),
+                                          folder="plant_disease/segmented/")
 
         record = PredictionRecord.objects.create(
             image=orig["secure_url"],
